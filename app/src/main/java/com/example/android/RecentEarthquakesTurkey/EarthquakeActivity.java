@@ -53,7 +53,7 @@ public class EarthquakeActivity extends AppCompatActivity {
     String jsonResponse = "";
 
     private String USGS_REQUEST_URL =
-            "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson";
+            "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&minlatitude=36&maxlatitude=42&minlongitude=26&maxlongitude=42";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,22 +64,22 @@ public class EarthquakeActivity extends AppCompatActivity {
 
         currentMonth+=1;
 
-        Toast.makeText(this,"ali",Toast.LENGTH_LONG).show();
         int currentDay = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
 
         int currentYear = Calendar.getInstance().get(Calendar.YEAR);
 
         String todayString ="&endtime=" + currentYear + "-" + currentMonth + "-" + currentDay;
 
-        if(currentMonth!=1){
-        currentMonth-=1;}else {
-            currentMonth+=11;
+        if(currentMonth==1 || currentMonth==2 || currentMonth==3){
+            currentMonth+=9;
             currentYear-=1;
+        } else {
+            currentMonth-=3;
         }
 
         String lastMonth  = "&starttime=" + currentYear + "-" + currentMonth + "-" +  currentDay;
 
-        USGS_REQUEST_URL = USGS_REQUEST_URL + lastMonth + todayString + "&minmagnitude=6";
+        USGS_REQUEST_URL = USGS_REQUEST_URL + lastMonth + todayString + "&minmagnitude=3";
         // Create a fake list of earthquake locations.
 
         InternetRequestAsyncTask task = new InternetRequestAsyncTask();
