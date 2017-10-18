@@ -17,9 +17,7 @@ import java.util.Calendar;
  */
 public final class QueryUtils {
 
-    public Double mMagDouble;
-
-    /** Sample JSON response for a USGS query */
+    public static final String LOG_TAG = QueryUtils.class.getName();
 
     /**
      * Create a private constructor because no one should ever create a {@link QueryUtils} object.
@@ -94,7 +92,7 @@ public final class QueryUtils {
             // If an error is thrown when executing any of the above statements in the "try" block,
             // catch the exception here, so the app doesn't crash. Print a log message
             // with the message from the exception.
-            Log.e("QueryUtils", "Problem parsing the earthquake JSON results", e);
+            Log.e(LOG_TAG, "Problem parsing the earthquake JSON results", e);
         }
 
         // Return the list of earthquakes

@@ -47,29 +47,29 @@ import java.util.Date;
 
 public class EarthquakeActivity extends AppCompatActivity {
 
+    //Log tag to determine where the errors occured
     public static final String LOG_TAG = EarthquakeActivity.class.getName();
-    Double magDouble;
 
+    //Empty string to in both Async task and main activity
     String jsonResponse = "";
 
+    //Setting our base URL to build over it
     private String USGS_REQUEST_URL =
-            "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&minlatitude=36&maxlatitude=42&minlongitude=26&maxlongitude=42";
+            "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&minlatitude=36&maxlatitude=42&minlongitude=26&maxlongitude=45";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.earthquake_activity);
 
+        //Getting date in ISO8601
         int currentMonth = Calendar.getInstance().get(Calendar.MONTH);
-
         currentMonth+=1;
-
         int currentDay = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
-
         int currentYear = Calendar.getInstance().get(Calendar.YEAR);
-
         String todayString ="&endtime=" + currentYear + "-" + currentMonth + "-" + currentDay;
 
+        //Calculating Last Three Month
         if(currentMonth==1 || currentMonth==2 || currentMonth==3){
             currentMonth+=9;
             currentYear-=1;
@@ -77,17 +77,19 @@ public class EarthquakeActivity extends AppCompatActivity {
             currentMonth-=3;
         }
 
+        //Completing our json string  for turkey for the last 3 months over 3point earthquakes
         String lastMonth  = "&starttime=" + currentYear + "-" + currentMonth + "-" +  currentDay;
-
         USGS_REQUEST_URL = USGS_REQUEST_URL + lastMonth + todayString + "&minmagnitude=3";
-        // Create a fake list of earthquake locations.
 
+
+        //Definition of Instnce of Async task and exetution
         InternetRequestAsyncTask task = new InternetRequestAsyncTask();
         task.execute();
 
         UpdateUI();
     }
 
+    //Method to Update UI when necesary
     private void UpdateUI(){
         final ArrayList<Earthquake> earthquakes =  QueryUtils.extractEarthquakes(jsonResponse);
 
@@ -117,32 +119,23 @@ public class EarthquakeActivity extends AppCompatActivity {
     private class InternetRequestAsyncTask extends AsyncTask<URL, Void, Earthquake> {
         @Override
         protected Earthquake doInBackground(URL... params) {
-            URL url = createUrl(USGS_REQUEST_URL);// ToDo (1) Create String for Turkey with good input
+            URL url = createUrl(USGS_REQUEST_URL);// Completed (1) Create String for Turkey with good input
 
             // Perform HTTP request to the URL and receive a JSON response back
             String jsonResponse = "";
             try {
                 jsonResponse = makeHttpRequest(url);
             } catch (IOException e) {
-                // TODO Handle the IOException
+                Log.e(LOG_TAG,"Error occured in backhround",e);
             }
 
-            // Extract relevant fields from the JSON response and create an {@link Event} object
-            //Earthquake earthquake1 ;
-            //ToDo(2) Re write the code to send proper earthquake instance or a link
-            // Return the {@link Event} object as the result fo the {@link TsunamiAsyncTask}
             return null;
         }
-
-
         protected void onPostExecute(Earthquake earthquake) {
-
             UpdateUI();
             if (earthquake == null) {
                 return;
             }
-
-
         }
 
         /**
@@ -163,7 +156,9 @@ public class EarthquakeActivity extends AppCompatActivity {
          * Make an HTTP request to the given URL and return a String as the response.
          */
         private String makeHttpRequest(URL url) throws IOException {
-
+            if (url==null){
+                return null;
+            }
             HttpURLConnection urlConnection = null;
             InputStream inputStream = null;
             try {
@@ -172,12 +167,18 @@ public class EarthquakeActivity extends AppCompatActivity {
                 urlConnection.setReadTimeout(10000 /* milliseconds */);
                 urlConnection.setConnectTimeout(15000 /* milliseconds */);
                 urlConnection.connect();
-                inputStream = urlConnection.getInputStream();
-                jsonResponse = readFromStream(inputStream);
-            } catch (IOException e) {
-                // TODO: Handle the exception
-            } finally {
+                int a =urlConnection.getResponseCode();
+                if (a==200){
+                    inputStream = urlConnection.getInputStream();
+                    jsonResponse = readFromStream(inputStream);
+                }else {
+                    Log.e(LOG_TAG,"Error while making http request:" + a);
+                }
 
+            } catch (IOException e) {
+                Log.e(LOG_TAG,"Error while making http request",e);
+                // Completed: Handle the exception
+            } finally {
                 if (urlConnection != null) {
                     urlConnection.disconnect();
                 }
@@ -206,15 +207,5 @@ public class EarthquakeActivity extends AppCompatActivity {
             }
             return output.toString();
         }
-
-        /**
-         *We already have these as Instance of Earthquake class
-         */
-        private Earthquake extractFeatureFromJson(String earthquakeJSON) {
-
-            return null;
-        }
     }
-
-
 }
