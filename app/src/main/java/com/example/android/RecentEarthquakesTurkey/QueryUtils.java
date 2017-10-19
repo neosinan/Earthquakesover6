@@ -1,6 +1,8 @@
 package com.example.android.RecentEarthquakesTurkey;
 
 
+import android.content.AsyncTaskLoader;
+import android.content.Context;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -11,6 +13,7 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 /**
  * Helper methods related to requesting and receiving earthquake data from USGS.
@@ -98,6 +101,5 @@ public final class QueryUtils {
         // Return the list of earthquakes
         return earthquakes;
     }
-
 
 }

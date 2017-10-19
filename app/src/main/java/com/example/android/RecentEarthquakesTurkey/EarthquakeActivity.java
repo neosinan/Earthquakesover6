@@ -15,22 +15,22 @@
  */
 package com.example.android.RecentEarthquakesTurkey;
 
-import android.app.usage.UsageEvents;
+import android.content.Context;
 import android.content.Intent;
+import android.database.CursorJoiner;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Bundle;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.AsyncTaskLoader;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
-import android.text.style.UpdateLayout;
+import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.Toast;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -40,15 +40,22 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
+
+import javax.xml.transform.Result;
+
 
 public class EarthquakeActivity extends AppCompatActivity {
 
     //Log tag to determine where the errors occured
     public static final String LOG_TAG = EarthquakeActivity.class.getName();
+
+    //Checks if process is failed
+    Boolean emptyBoolean=false;
+
+    //Checks If Something went wrong in the app
+    Boolean failedBoolean=false;
 
     //Empty string to in both Async task and main activity
     String jsonResponse = "";
@@ -76,21 +83,22 @@ public class EarthquakeActivity extends AppCompatActivity {
         } else {
             currentMonth-=3;
         }
-
         //Completing our json string  for turkey for the last 3 months over 3point earthquakes
         String lastMonth  = "&starttime=" + currentYear + "-" + currentMonth + "-" +  currentDay;
         USGS_REQUEST_URL = USGS_REQUEST_URL + lastMonth + todayString + "&minmagnitude=3";
 
-
-        //Definition of Instnce of Async task and exetution
-        InternetRequestAsyncTask task = new InternetRequestAsyncTask();
-        task.execute();
-
-        UpdateUI();
+        InternetRequestAsyncTask inte = new InternetRequestAsyncTask();
+        inte.execute();
     }
-
     //Method to Update UI when necesary
     private void UpdateUI(){
+
+        ProgressBar progressBar =(ProgressBar) findViewById(R.id.progress_bar);
+        progressBar.setVisibility(View.GONE);
+        if (emptyBoolean){
+            TextView emptyView = (TextView) findViewById(R.id.empty_list_item);
+            emptyView.setVisibility(View.VISIBLE);
+        }
         final ArrayList<Earthquake> earthquakes =  QueryUtils.extractEarthquakes(jsonResponse);
 
         ListView earthquakeListView = (ListView) findViewById(R.id.list);
@@ -116,6 +124,8 @@ public class EarthquakeActivity extends AppCompatActivity {
         });
     }
 
+
+
     private class InternetRequestAsyncTask extends AsyncTask<URL, Void, Earthquake> {
         @Override
         protected Earthquake doInBackground(URL... params) {
@@ -126,7 +136,12 @@ public class EarthquakeActivity extends AppCompatActivity {
             try {
                 jsonResponse = makeHttpRequest(url);
             } catch (IOException e) {
+                failedBoolean=true;
                 Log.e(LOG_TAG,"Error occured in backhround",e);
+            }
+
+            if(jsonResponse==""){
+                emptyBoolean=true;
             }
 
             return null;
@@ -208,4 +223,5 @@ public class EarthquakeActivity extends AppCompatActivity {
             return output.toString();
         }
     }
+
 }
