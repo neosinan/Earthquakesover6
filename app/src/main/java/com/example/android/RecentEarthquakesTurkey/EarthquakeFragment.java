@@ -3,6 +3,7 @@ package com.example.android.RecentEarthquakesTurkey;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -50,9 +51,9 @@ public class EarthquakeFragment extends Fragment {
 
     //Setting our base URL to build over it
     private String USGS_REQUEST_URL =
-            "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&minlatitude=36&maxlatitude=42&minlongitude=26&maxlongitude=45";
+            "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson";
 
-
+    private static String TURKEY = "&minlatitude=36&maxlatitude=42&minlongitude=26&maxlongitude=45";
 
     public EarthquakeFragment() {
         // Required empty public constructor
@@ -65,6 +66,7 @@ public class EarthquakeFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_earthquake, container, false);
         mview=rootView;
+
         //Getting date in ISO8601
         int currentMonth = Calendar.getInstance().get(Calendar.MONTH);
         currentMonth+=1;
@@ -79,9 +81,17 @@ public class EarthquakeFragment extends Fragment {
         } else {
             currentMonth-=3;
         }
+
+        //Checks if The sharedpref about Turkey
+        if (getBoolean()){
+            USGS_REQUEST_URL+=TURKEY;
+        }
+
+        String minMagnitude="&minmagnitude="+getPref();//Checks if The sharedpref about magnitude
+
         //Completing our json string  for turkey for the last 3 months over 3point earthquakes
         String lastMonth  = "&starttime=" + currentYear + "-" + currentMonth + "-" +  currentDay;
-        USGS_REQUEST_URL = USGS_REQUEST_URL + lastMonth + todayString + "&minmagnitude=3";
+        USGS_REQUEST_URL = USGS_REQUEST_URL + lastMonth + todayString + minMagnitude ;
 
         InternetRequestAsyncTask inte = new InternetRequestAsyncTask();
         inte.execute();
@@ -137,8 +147,16 @@ public class EarthquakeFragment extends Fragment {
         return cm.getActiveNetworkInfo() != null;
     }
 
-
-
+    private String getPref(){
+        SharedPreferences mSharedPreferences = getActivity().getSharedPreferences("info", Context.MODE_PRIVATE);
+        String stra= mSharedPreferences.getString("Mag","3");
+        return stra;
+    }
+    private Boolean getBoolean(){
+        SharedPreferences mSharedPreferences = getActivity().getSharedPreferences("info", Context.MODE_PRIVATE);
+        Boolean stra= mSharedPreferences.getBoolean("Region",true);
+        return stra;
+    }
 
     private class InternetRequestAsyncTask extends AsyncTask<URL, Void, Earthquake> {
         @Override

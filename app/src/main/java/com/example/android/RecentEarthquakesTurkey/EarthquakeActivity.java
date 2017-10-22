@@ -38,21 +38,7 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
-import android.widget.TextView;
-import android.widget.Toast;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Calendar;
-
-import javax.xml.transform.Result;
 
 
 public class EarthquakeActivity extends AppCompatActivity {
@@ -82,11 +68,10 @@ public class EarthquakeActivity extends AppCompatActivity {
 
         //respond to menu item selection
         int id = item.getItemId();
-
         if (id == R.id.action_settings) {
-            SettingsFragments settingFragments = new SettingsFragments();
+            adjustment adjustment= new adjustment();
             FragmentManager manager = getSupportFragmentManager();
-            manager.beginTransaction().replace(R.id.settings_frag, settingFragments,settingFragments.getTag()).commit();
+            manager.beginTransaction().replace(R.id.settings_frag,adjustment,adjustment.getTag()).commit();
             RelativeLayout rea =(RelativeLayout) findViewById(R.id.settings_frag);
             rea.setVisibility(View.VISIBLE);
 

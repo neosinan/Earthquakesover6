@@ -11,8 +11,10 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:id="@+id/settings_frag"
-        android:visibility="gone"/>
+        android:visibility="gone"
+        android:id="@+id/settings_frag"/>
+        <!--android:visibility="gone"-->
+
 
     <RelativeLayout
         android:id="@+id/fragment_Earthquake"

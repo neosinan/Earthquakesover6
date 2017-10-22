@@ -22,4 +22,7 @@
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="ButtonString">enter</string>
+    <string name="turkeyString">Sadece Türkiyedeki Depremler</string>
+    <string name="worldString">Bütün Dünyadaki Depremler</string>
 </resources>
