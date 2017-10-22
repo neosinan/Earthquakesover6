@@ -30,7 +30,6 @@ public class adjustment extends Fragment {
         // Required empty public constructor
     }
 
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -60,7 +59,7 @@ public class adjustment extends Fragment {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked){
                     storeBoolean(true);//this Changes if The sharedpref about Region
-                    // find your fragment
+                    // find your fragment which you wanna refresh
                     EarthquakeFragment earthquakeFragment=new EarthquakeFragment();
                     FragmentManager manager = getActivity().getSupportFragmentManager();
                     manager.beginTransaction().replace(R.id.fragment_Earthquake, earthquakeFragment,earthquakeFragment.getTag()).commit();

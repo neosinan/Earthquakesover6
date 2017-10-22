@@ -46,6 +46,8 @@ public class EarthquakeActivity extends AppCompatActivity {
     //Log tag to determine where the errors occured
     public static final String LOG_TAG = EarthquakeActivity.class.getName();
 
+    Boolean mOpen=false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -65,19 +67,23 @@ public class EarthquakeActivity extends AppCompatActivity {
     }
 
     public boolean onOptionsItemSelected(MenuItem item) {
-
-        //respond to menu item selection
-        int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            adjustment adjustment= new adjustment();
-            FragmentManager manager = getSupportFragmentManager();
-            manager.beginTransaction().replace(R.id.settings_frag,adjustment,adjustment.getTag()).commit();
-            RelativeLayout rea =(RelativeLayout) findViewById(R.id.settings_frag);
-            rea.setVisibility(View.VISIBLE);
-
-            return true;
+        if (mOpen==false){
+            //respond to menu item selection
+            int id = item.getItemId();
+            if (id == R.id.action_settings) {
+                adjustment adjustment = new adjustment();
+                FragmentManager manager = getSupportFragmentManager();
+                manager.beginTransaction().replace(R.id.settings_frag, adjustment, adjustment.getTag()).commit();
+                RelativeLayout rea = (RelativeLayout) findViewById(R.id.settings_frag);
+                rea.setVisibility(View.VISIBLE);
+                mOpen=true;
+            }
+        }else {
+            //this makes settings fragments disapper
+            RelativeLayout rea = (RelativeLayout) findViewById(R.id.settings_frag);
+            rea.setVisibility(View.GONE);
+            mOpen=false;
         }
-
         return super.onOptionsItemSelected(item);
     }
 
