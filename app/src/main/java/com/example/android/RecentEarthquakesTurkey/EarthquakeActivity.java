@@ -18,19 +18,28 @@ package com.example.android.RecentEarthquakesTurkey;
 import android.content.Context;
 import android.content.Intent;
 import android.database.CursorJoiner;
+import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.preference.PreferenceFragment;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -51,177 +60,42 @@ public class EarthquakeActivity extends AppCompatActivity {
     //Log tag to determine where the errors occured
     public static final String LOG_TAG = EarthquakeActivity.class.getName();
 
-    //Checks if process is failed
-    Boolean emptyBoolean=false;
-
-    //Checks If Something went wrong in the app
-    Boolean failedBoolean=false;
-
-    //Empty string to in both Async task and main activity
-    String jsonResponse = "";
-
-    //Setting our base URL to build over it
-    private String USGS_REQUEST_URL =
-            "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&minlatitude=36&maxlatitude=42&minlongitude=26&maxlongitude=45";
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.earthquake_activity);
-
-        //Getting date in ISO8601
-        int currentMonth = Calendar.getInstance().get(Calendar.MONTH);
-        currentMonth+=1;
-        int currentDay = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
-        int currentYear = Calendar.getInstance().get(Calendar.YEAR);
-        String todayString ="&endtime=" + currentYear + "-" + currentMonth + "-" + currentDay;
-
-        //Calculating Last Three Month
-        if(currentMonth==1 || currentMonth==2 || currentMonth==3){
-            currentMonth+=9;
-            currentYear-=1;
-        } else {
-            currentMonth-=3;
-        }
-        //Completing our json string  for turkey for the last 3 months over 3point earthquakes
-        String lastMonth  = "&starttime=" + currentYear + "-" + currentMonth + "-" +  currentDay;
-        USGS_REQUEST_URL = USGS_REQUEST_URL + lastMonth + todayString + "&minmagnitude=3";
-
-        InternetRequestAsyncTask inte = new InternetRequestAsyncTask();
-        inte.execute();
-    }
-    //Method to Update UI when necesary
-    private void UpdateUI(){
-
-        ProgressBar progressBar =(ProgressBar) findViewById(R.id.progress_bar);
-        progressBar.setVisibility(View.GONE);
-        if (emptyBoolean){
-            TextView emptyView = (TextView) findViewById(R.id.empty_list_item);
-            emptyView.setVisibility(View.VISIBLE);
-        }
-        final ArrayList<Earthquake> earthquakes =  QueryUtils.extractEarthquakes(jsonResponse);
-
-        ListView earthquakeListView = (ListView) findViewById(R.id.list);
-
-        // Create a new {@link ArrayAdapter} of earthquakes
-        EarthquakeAdaptor adapter = new EarthquakeAdaptor(this, earthquakes);
-
-        // Set the adapter on the {@link ListView}
-        // so the list can be populated in the user interface
-        earthquakeListView.setAdapter(adapter);
-
-        earthquakeListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Earthquake earthquake = earthquakes.get(position);
-
-                String URLString = earthquake.getmURL();
-                //URLString = Earthquake.getmURL(position));
-                Intent i = new Intent(Intent.ACTION_VIEW);
-                i.setData(Uri.parse(URLString));
-                startActivity(i);
-            }
-        });
+        EarthquakeFragment earthquakeFragment=new EarthquakeFragment();
+        FragmentManager manager = getSupportFragmentManager();
+        manager.beginTransaction().replace(R.id.fragment_Earthquake, earthquakeFragment,earthquakeFragment.getTag()).commit();
     }
 
 
 
-    private class InternetRequestAsyncTask extends AsyncTask<URL, Void, Earthquake> {
-        @Override
-        protected Earthquake doInBackground(URL... params) {
-            URL url = createUrl(USGS_REQUEST_URL);// Completed (1) Create String for Turkey with good input
-
-            // Perform HTTP request to the URL and receive a JSON response back
-            String jsonResponse = "";
-            try {
-                jsonResponse = makeHttpRequest(url);
-            } catch (IOException e) {
-                failedBoolean=true;
-                Log.e(LOG_TAG,"Error occured in backhround",e);
-            }
-
-            if(jsonResponse==""){
-                emptyBoolean=true;
-            }
-
-            return null;
-        }
-        protected void onPostExecute(Earthquake earthquake) {
-            UpdateUI();
-            if (earthquake == null) {
-                return;
-            }
-        }
-
-        /**
-         * Returns new URL object from the given string URL.
-         */
-        private URL createUrl(String stringUrl) {
-            URL url = null;
-            try {
-                url = new URL(stringUrl);
-            } catch (MalformedURLException exception) {
-                Log.e(LOG_TAG, "Error with creating URL", exception);
-                return null;
-            }
-            return url;
-        }
-
-        /**
-         * Make an HTTP request to the given URL and return a String as the response.
-         */
-        private String makeHttpRequest(URL url) throws IOException {
-            if (url==null){
-                return null;
-            }
-            HttpURLConnection urlConnection = null;
-            InputStream inputStream = null;
-            try {
-                urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setRequestMethod("GET");
-                urlConnection.setReadTimeout(10000 /* milliseconds */);
-                urlConnection.setConnectTimeout(15000 /* milliseconds */);
-                urlConnection.connect();
-                int a =urlConnection.getResponseCode();
-                if (a==200){
-                    inputStream = urlConnection.getInputStream();
-                    jsonResponse = readFromStream(inputStream);
-                }else {
-                    Log.e(LOG_TAG,"Error while making http request:" + a);
-                }
-
-            } catch (IOException e) {
-                Log.e(LOG_TAG,"Error while making http request",e);
-                // Completed: Handle the exception
-            } finally {
-                if (urlConnection != null) {
-                    urlConnection.disconnect();
-                }
-                if (inputStream != null) {
-                    // function must handle java.io.IOException here
-                    inputStream.close();
-                }
-            }
-            return jsonResponse;
-        }
-
-        /**
-         * Convert the {@link InputStream} into a String which contains the
-         * whole JSON response from the server.
-         */
-        private String readFromStream(InputStream inputStream) throws IOException {
-            StringBuilder output = new StringBuilder();
-            if (inputStream != null) {
-                InputStreamReader inputStreamReader = new InputStreamReader(inputStream, Charset.forName("UTF-8"));
-                BufferedReader reader = new BufferedReader(inputStreamReader);
-                String line = reader.readLine();
-                while (line != null) {
-                    output.append(line);
-                    line = reader.readLine();
-                }
-            }
-            return output.toString();
-        }
+    //that is how menu button is infleted
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu, menu);
+        return true;
     }
+
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        //respond to menu item selection
+        int id = item.getItemId();
+
+        if (id == R.id.action_settings) {
+            SettingsFragments settingFragments = new SettingsFragments();
+            FragmentManager manager = getSupportFragmentManager();
+            manager.beginTransaction().replace(R.id.settings_frag, settingFragments,settingFragments.getTag()).commit();
+            RelativeLayout rea =(RelativeLayout) findViewById(R.id.settings_frag);
+            rea.setVisibility(View.VISIBLE);
+
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+
 
 }
