@@ -74,12 +74,23 @@ public class EarthquakeFragment extends Fragment {
         int currentYear = Calendar.getInstance().get(Calendar.YEAR);
         String todayString ="&endtime=" + currentYear + "-" + currentMonth + "-" + currentDay;
 
+        int storedMonth=getMonths();
+
         //Calculating Last Three Month
-        if(currentMonth==1 || currentMonth==2 || currentMonth==3){
-            currentMonth+=9;
+        if(currentMonth==1 ){
+            currentMonth= currentMonth + 12 - storedMonth;
             currentYear-=1;
-        } else {
-            currentMonth-=3;
+        } else if(currentMonth==2 && (storedMonth==2 || storedMonth==3 || storedMonth==6)){
+            currentMonth= currentMonth + 12 - storedMonth;
+            currentYear-=1;
+        } else if(currentMonth==3 && (storedMonth==3 || storedMonth==6)){
+            currentMonth= currentMonth + 12 - storedMonth;
+            currentYear-=1;
+        } else if((currentMonth==6 || currentMonth==5 || currentMonth==4) && storedMonth==6){
+            currentMonth= currentMonth + 12 - storedMonth;
+            currentYear-=1;
+        } else{
+            currentMonth-=storedMonth;
         }
 
         //Checks if The sharedpref about Turkey
@@ -143,7 +154,6 @@ public class EarthquakeFragment extends Fragment {
     //This method checks if we connected to internet or not
     private boolean isNetworkConnected() {
         ConnectivityManager cm = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
-
         return cm.getActiveNetworkInfo() != null;
     }
 
@@ -155,6 +165,11 @@ public class EarthquakeFragment extends Fragment {
     private Boolean getBoolean(){
         SharedPreferences mSharedPreferences = getActivity().getSharedPreferences("info", Context.MODE_PRIVATE);
         Boolean stra= mSharedPreferences.getBoolean("Region",true);
+        return stra;
+    }
+    private int getMonths(){
+        SharedPreferences mSharedPreferences = getActivity().getSharedPreferences("info", Context.MODE_PRIVATE);
+        int stra= mSharedPreferences.getInt("Month",3);
         return stra;
     }
 

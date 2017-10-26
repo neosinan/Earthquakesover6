@@ -25,4 +25,8 @@
     <string name="ButtonString">enter</string>
     <string name="turkeyString">Sadece Türkiyedeki Depremler</string>
     <string name="worldString">Bütün Dünyadaki Depremler</string>
+    <string name="OneMonth">1 Month</string>
+    <string name="TwoMonths">2 Months</string>
+    <string name="ThreeMoths">3 Months</string>
+    <string name="SixMonths">6 Months</string>
 </resources>

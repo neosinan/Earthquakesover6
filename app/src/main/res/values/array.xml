@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="array_months">
+        <item>@string/OneMonth</item>
+        <item>@string/TwoMonths</item>
+        <item>@string/ThreeMoths</item>
+        <item>@string/SixMonths</item>
+    </string-array>
+</resources>
